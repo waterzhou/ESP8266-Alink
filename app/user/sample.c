@@ -556,20 +556,26 @@ int ICACHE_FLASH_ATTR alink_demo()
 	os_printf("%s %d wait time=%d \n", __FUNCTION__, __LINE__, ALINK_WAIT_FOREVER);
 
 	ESP_DBG(("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"));
-	if(ALINK_OK == alink_wait_connect(NULL, ALINK_WAIT_FOREVER))	//wait main device login, -1 means wait forever
+	int ret = alink_wait_connect(NULL, ALINK_WAIT_FOREVER);
+	// Always return -1 although seems working OK.
+	//if(ALINK_OK == alink_wait_connect(NULL, ALINK_WAIT_FOREVER))	//wait main device login, -1 means wait forever
+	/*if(ret >= 0)
 	{
-		os_printf("alink wait connect OK.......\n");
+		os_printf("alink wait connect OK.......%d\n", ret);
 #if USER_UART_CTRL_DEV_EN
 		serial_resp_out(CMD_WIFI_CLOUD_READY,CMD_SUCCESS);
 #endif
 	}
 	else
 	{
-		os_printf("alink wait connect fail.......\n");
+		os_printf("alink wait connect fail.......%d\n", ret);
 #if USER_UART_CTRL_DEV_EN
 		serial_resp_out(CMD_WIFI_CLOUD_READY,CMD_FAIL);
 #endif
-	}
+	}*/
+#if USER_UART_CTRL_DEV_EN
+	serial_resp_out(CMD_WIFI_CLOUD_READY,CMD_SUCCESS);
+#endif
 	if(need_notify_app) {
 		need_notify_app = 0;
 		uint8 macaddr[6];

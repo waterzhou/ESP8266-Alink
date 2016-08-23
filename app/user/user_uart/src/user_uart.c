@@ -84,7 +84,7 @@ uint16 form_serial_packet(uint8 cmdid, uint8 *data, uint8 datalen, uint8 *buf)
 	}
 	*p = sum8(buf, (p - buf));
 	p++;
-
+	debug_print_hex_data(buf, p-buf);
 	return (p - buf);
 }
 
@@ -92,7 +92,10 @@ serial_cmd_t* ICACHE_FLASH_ATTR issue_ctrl_cmd(uint8 *buf, uint8 len)
 {
 	uint16 pkt_len;
 	uint8 serial_pkt[CUS_UART_TX_MAX];
+	memset(serial_pkt, 0, sizeof(serial_pkt));
 	pkt_len = form_serial_packet(CUSTOMIZE_CMD_DEV_CTRL, buf, len, serial_pkt);
+
+	debug_print_hex_data(serial_pkt, pkt_len);
 	uart0_write_data(serial_pkt, pkt_len);
 	ctrl_serial_cmd.waiting_resp = 1;
 	return &ctrl_serial_cmd;
@@ -145,6 +148,10 @@ void ICACHE_FLASH_ATTR cus_wifi_handler_alinkdata2mcu(u8 dat_index, int dat_valu
 {
 	ESP_DBG(("data2mcu handler, index[%x],data_value[%x]",dat_index,dat_value));
 	// here handler user own uart protocol...
+	uint8 command[2];
+	command[0] = dat_index;
+	command[1] = dat_value;
+	do_ctrl(command, 2);	
 	return;
 }
 static u8 ICACHE_FLASH_ATTR execute_serial_cmd(uint8 cmdid, uint8 *data, uint8 datalen)
@@ -153,8 +160,23 @@ static u8 ICACHE_FLASH_ATTR execute_serial_cmd(uint8 cmdid, uint8 *data, uint8 d
 	switch(cmdid)
 	{
 		case CUSTOMIZE_CMD_FACTORY_RESET:
-		user_key_short_press();
-		break;
+			user_key_short_press();
+			break;
+		case CUSTOMIZE_CMD_DEV_CTRL_RESP:
+			{
+				uint8 command[2];
+				ESP_DBG(("cmd ctrl resp\r\n"));
+				if (ctrl_serial_cmd.waiting_resp == 1)
+					ctrl_serial_cmd.waiting_resp = 0;
+				memcpy(command, data, datalen);
+				if (command[0] == 0)
+				{
+					ESP_DBG(("This is command for power\r\n"));
+					virtual_device.power = command[1];
+				}
+			}
+			break;
+
 	}
 }
 static u8 ICACHE_FLASH_ATTR cus_uart_data_handle(char *dat_in, int in_len, char *dat_out)
@@ -190,18 +212,7 @@ static u8 ICACHE_FLASH_ATTR cus_uart_data_handle(char *dat_in, int in_len, char 
 		p = p + len;
 		in_len = in_len - len;
 	}
-#if 0  // test data 
-	u32 r,g,b,cw,ww;
-	u8 buf[24]={0};
-	r = dat_in[0];
-	g = dat_in[1];
-	b = dat_in[2];
-	cw = dat_in[3];
-	ww = dat_in[4];
-	sprintf(buf,"is:[%X] [%X] [%X] [%X] [%X]ok",r,g,b,cw,ww);
-	light_set_aim(r,g,b,cw,ww,1000);
-	uart0_write_data(buf,strlen(buf));   // send data to device uart mcu, device mcu will handle this data from alink server
-#endif	
+
 	return 0x00;
 }
 
@@ -210,7 +221,7 @@ void ICACHE_FLASH_ATTR user_uart_task(void *pvParameters)
 
 	u32 sys_time_value = system_get_time();
 	char uart_beat_data[]={0x7e, 0x0, 0x02, 0xFA, 0x0, 0x7A};
-		
+
 	vTaskDelay(100);
 	serial_resp_out(CMD_WIFI_MODULE_READY,CMD_SUCCESS);
 

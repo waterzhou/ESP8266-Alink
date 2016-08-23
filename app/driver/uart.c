@@ -74,13 +74,15 @@ uart1_write_char(char c)
 void
 uart0_write_char(char c)
 {
-    if (c == '\n') {
+    /*if (c == '\n') {
         uart_tx_one_char(UART0, '\r');
         uart_tx_one_char(UART0, '\n');
     } else if (c == '\r') {
     } else {
         uart_tx_one_char(UART0, c);
-    }
+    }*/
+
+    uart_tx_one_char(UART0, c);
 }
 
 LOCAL void
