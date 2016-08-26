@@ -36,6 +36,8 @@
 xQueueHandle xQueueCusUart;
 serial_cmd_t ctrl_serial_cmd;
 CusUartIntrPtr dev_data_from_mcu;
+char uart_cfg_change = 0;
+char uart_cfg_baud_index;
 
 void debug_print_hex_data(char*buf, int len)
 {
@@ -176,6 +178,30 @@ static u8 ICACHE_FLASH_ATTR execute_serial_cmd(uint8 cmdid, uint8 *data, uint8 d
 				}
 			}
 			break;
+		case CUSTOMIZE_CMD_CHANGE_UART_CFG:
+			{
+				uint8 command[2];
+				ESP_DBG(("cmd change uart cfg\r\n"));
+				if (datalen == 2)
+				{
+					memcpy(command, data, datalen);
+				}
+				serial_resp_out(CUSTOMIZE_CMD_CHANGE_UART_CFG_RESP, CMD_SUCCESS);
+
+				uart_cfg_baud_index = command[0];
+				uart_cfg_change = 1;
+				 vTaskDelay(100);
+			}
+			break;
+		case CUSTOMIZE_CMD_DATA_UPLOAD:
+			{	
+				ESP_DBG(("cmd data upload\r\n"));
+				device_status_change = 1;
+				serial_resp_out(CUSTOMIZE_CMD_DATA_UPLOAD_RESP, CMD_SUCCESS);
+			}
+			break;
+		default:
+			break;
 
 	}
 }
@@ -186,7 +212,6 @@ static u8 ICACHE_FLASH_ATTR cus_uart_data_handle(char *dat_in, int in_len, char 
 	u8 resp = CMD_SUCCESS;
 	uint8 len, crc, cmdid;
 	ESP_DBG(("uart data handler.."));
-	debug_print_hex_data(dat_in, in_len);
 	while(in_len > 3)
 	{
 		if(*p != SERIAL_SOF)
@@ -242,6 +267,25 @@ void ICACHE_FLASH_ATTR user_uart_task(void *pvParameters)
 			ESP_DBG(("heap_size %d\n", system_get_free_heap_size()));
 			uart0_write_data(uart_beat_data,sizeof(uart_beat_data));
 			sys_time_value = system_get_time();
+		}
+
+		if(uart_cfg_change == 1)
+		{
+			uart_cfg_change = 0;
+			if(uart_cfg_baud_index == 1)
+			{
+				ESP_DBG(("UART baud to B19200\r\n"));
+				UART_ConfigTypeDef uart_config;
+				uart_config.baud_rate    = BIT_RATE_19200;
+				uart_config.data_bits     = UART_WordLength_8b;
+				uart_config.parity          = USART_Parity_None;
+				uart_config.stop_bits     = USART_StopBits_1;
+				uart_config.flow_ctrl      = USART_HardwareFlowControl_None;
+				uart_config.UART_RxFlowThresh = 120;
+				uart_config.UART_InverseMask = UART_None_Inverse;
+				UART_ParamConfig(UART0, &uart_config);
+
+			}
 		}
 	}
 

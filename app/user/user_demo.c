@@ -382,12 +382,7 @@ void ICACHE_FLASH_ATTR user_demo(void)
 
 #if USER_UART_CTRL_DEV_EN
 	user_uart_dev_start();  // create a task to handle uart data
-
-	//vTaskDelay(100);
-//	serial_resp_out(CMD_WIFI_MODULE_READY,CMD_SUCCESS);
 #endif
-
-
 	return;
 }
 
