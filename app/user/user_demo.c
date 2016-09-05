@@ -34,9 +34,14 @@
 #if USER_UART_CTRL_DEV_EN
 #include "user_uart.h" // user uart handler head
 #endif
-//#if USER_PWM_LIGHT_EN
+#if USER_PWM_LIGHT_EN
 #include "user_light.h"  // user pwm light head
-//#endif
+#endif
+
+#if USER_SPI_CTRL_DEV_EN
+#include "driver/spi.h"
+#endif
+
 #define ENABLE_GPIO_KEY
 
 #ifdef ENABLE_GPIO_KEY
@@ -382,6 +387,10 @@ void ICACHE_FLASH_ATTR user_demo(void)
 
 #if USER_UART_CTRL_DEV_EN
 	user_uart_dev_start();  // create a task to handle uart data
+#endif
+
+#if USER_SPI_CTRL_DEV_EN
+	spi_init(HSPI);
 #endif
 	return;
 }

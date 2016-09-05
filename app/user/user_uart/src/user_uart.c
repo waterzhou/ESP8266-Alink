@@ -27,6 +27,7 @@
 #include <string.h>
 #include "esp_common.h"
 #include "user_uart.h"
+#include "../../../include/driver/spi.h"
 
 
 #if USER_UART_CTRL_DEV_EN
@@ -261,11 +262,12 @@ void ICACHE_FLASH_ATTR user_uart_task(void *pvParameters)
 				cus_uart_data_handle(dev_data_from_mcu.rx_buf, dev_data_from_mcu.rx_len,NULL);
 			}
 		}
-		if((system_get_time()-sys_time_value)>=(60*1000*1000))  //about 1min, send data to uart0, demo beat data
+		if((system_get_time()-sys_time_value)>=(5*1000*1000))  //about 1min, send data to uart0, demo beat data
 		{
 			ESP_DBG(("uart beat data.[%d][%d]",sys_time_value,system_get_time()));
 			ESP_DBG(("heap_size %d\n", system_get_free_heap_size()));
 			uart0_write_data(uart_beat_data,sizeof(uart_beat_data));
+			spi_tx8(HSPI, 0x7a);
 			sys_time_value = system_get_time();
 		}
 

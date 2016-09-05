@@ -78,4 +78,7 @@
  /home/esp8266/Share/github/app/../ESP8266_RTOS_SDK_ALINK/include/espressif/pwm.h \
  ../include/user_uart.h \
  /home/esp8266/Share/github/app/../ESP8266_RTOS_SDK_ALINK/include/freertos/queue.h \
- ../include/../../../include/user_config.h ../../../include/driver/uart.h
+ ../include/../../../include/user_config.h ../../../include/driver/spi.h \
+ /home/esp8266/Share/github/app/../ESP8266_RTOS_SDK_ALINK/include/espressif/esp8266/spi_register.h \
+ /home/esp8266/Share/github/app/../ESP8266_RTOS_SDK_ALINK/include/espressif/esp8266/ets_sys.h \
+ ../../../include/driver/uart.h
