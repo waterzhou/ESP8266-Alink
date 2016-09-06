@@ -85,25 +85,13 @@ const char *main_dev_params =
 
 char device_status_change = 1;
 /*设备上报数据,需要客户根据具体业务去实现*/
-
 #define buffer_size 512
 static int ICACHE_FLASH_ATTR alink_device_post_data(alink_down_cmd_ptr down_cmd)
 {
 	alink_up_cmd up_cmd;
 	int ret = ALINK_ERR;
-	//char buffer[1024];
 	char *buffer = NULL;
-//      static int count=0;
 	if (device_status_change) {
-
-/*		count++;
-		if(count>20)
-		{
-
-			device_status_change=0;
-			wsf_deb("alink_device_post_raw_data skip");
-			return 0;
-		}*/
 
 		wsf_deb("##[%s][%s|%d]Malloc %u. Available memory:%d.\n", __FILE__, __FUNCTION__, __LINE__,
 			buffer_size, system_get_free_heap_size());
@@ -143,11 +131,9 @@ static int ICACHE_FLASH_ATTR alink_device_post_data(alink_down_cmd_ptr down_cmd)
 		stack_free_size();
 	}
 	return ret;
-
 }
 
 /* do your job end */
-
 int sample_running = ALINK_TRUE;
 
 /*get json cmd from server 服务器下发命令,需要设备端根据具体业务设定去解析处理*/
@@ -555,7 +541,6 @@ int ICACHE_FLASH_ATTR alink_demo()
 
 	os_printf("%s %d wait time=%d \n", __FUNCTION__, __LINE__, ALINK_WAIT_FOREVER);
 
-	ESP_DBG(("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"));
 	int ret = alink_wait_connect(NULL, ALINK_WAIT_FOREVER);
 	// Always return -1 although seems working OK.
 	//if(ALINK_OK == alink_wait_connect(NULL, ALINK_WAIT_FOREVER))	//wait main device login, -1 means wait forever

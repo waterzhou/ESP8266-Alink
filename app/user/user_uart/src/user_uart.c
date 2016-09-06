@@ -195,7 +195,9 @@ static u8 ICACHE_FLASH_ATTR execute_serial_cmd(uint8 cmdid, uint8 *data, uint8 d
 			}
 			break;
 		case CUSTOMIZE_CMD_DATA_UPLOAD:
-			{	
+			{
+				uint8 attr_flags;
+				//uint8 attr_vals[];
 				ESP_DBG(("cmd data upload\r\n"));
 				device_status_change = 1;
 				serial_resp_out(CUSTOMIZE_CMD_DATA_UPLOAD_RESP, CMD_SUCCESS);
